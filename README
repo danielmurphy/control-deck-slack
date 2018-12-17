@@ -1,1 +1,0 @@
-Expects a Slack token in `ENV['SLACK_API_TOKEN']`
