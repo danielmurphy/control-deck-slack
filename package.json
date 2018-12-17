@@ -4,6 +4,7 @@
   "description": "Control Deck plugin to interact with Slack",
   "main": "index.js",
   "author": "Daniel Murphy",
+  "repository": "https://github.com/danielmurphy/control-deck-slack",
   "license": "MIT",
   "private": false,
   "dependencies": {
