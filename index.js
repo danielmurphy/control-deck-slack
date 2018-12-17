@@ -1,4 +1,5 @@
 const path = require('path');
+const { exec } = require('child_process');
 const { RTMClient, WebClient } = require('@slack/client');
 
 const sharp = require('sharp');
@@ -8,13 +9,13 @@ class ControlDeckSlack {
   constructor(streamDeck, buttonId, options) {
     if (options.type === 'toggle-status') {
       new ToggleStatus(streamDeck, buttonId, options);
-    } else if (options.type === 'show-user-status') {
-      new ShowUserStatus(streamDeck, buttonId, options);
+    } else if (options.type === 'user') {
+      new User(streamDeck, buttonId, options);
     }
   }
 }
 
-class ShowUserStatus {
+class User {
   constructor(streamDeck, buttonId, options) {
     this.streamDeck = streamDeck;
     this.buttonId = buttonId;
@@ -23,6 +24,14 @@ class ShowUserStatus {
     const slackToken = process.env.SLACK_API_TOKEN;
     const web = new WebClient(slackToken);
     const rtm = new RTMClient(slackToken);
+
+    this.streamDeck.on('down', keyIndex => {
+      if (keyIndex === this.buttonId) {
+        exec(
+          `open 'slack://user?team=${options.team_id}&id=${options.user_id}'`
+        );
+      }
+    });
 
     rtm.start({
       batch_presence_aware: true
@@ -50,7 +59,6 @@ class ShowUserStatus {
           });
 
         rtm.on('presence_change', event => {
-          console.log(`setting to ${event.presence}`);
           event.presence === 'active'
             ? streamDeck.fillImageFromFile(this.buttonId, this.onlineImage)
             : streamDeck.fillImageFromFile(this.buttonId, this.offlineImage);
@@ -84,7 +92,6 @@ class ToggleStatus {
     });
 
     streamDeck.on('up', keyIndex => {
-      console.log('up!');
       if (keyIndex === buttonId) {
         let newStatus = myPresence === 'away' ? 'auto' : 'away';
         web.users.setPresence({ presence: newStatus });
