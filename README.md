@@ -1,6 +1,6 @@
 # Control Deck Plugin for Slack
 
-This is [Control Deck](https://github.com/danielmurphy/control-deck) plugin gives you two Slack features for your Stream Deck:
+This [Control Deck](https://github.com/danielmurphy/control-deck) plugin gives you two Slack features for your Stream Deck:
 
 `toggle-status` - A simple button to toggle your Slack status between active and away.
 
