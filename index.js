@@ -1,12 +1,11 @@
 const path = require('path');
-const { RTMClient } = require('@slack/client');
+const { RTMClient, WebClient } = require('@slack/client');
+
 const sharp = require('sharp');
 const request = require('request').defaults({ encoding: null });
-const fs = require('fs');
 
 class ControlDeckSlack {
   constructor(streamDeck, buttonId, options) {
-    console.log('still here');
     if (options.type === 'toggle-status') {
       new ToggleStatus(streamDeck, buttonId, options);
     } else if (options.type === 'show-user-status') {
@@ -22,34 +21,8 @@ class ShowUserStatus {
     this.userId = options.user_id;
 
     const slackToken = process.env.SLACK_API_TOKEN;
-    // const web = new WebClient(slackToken);
+    const web = new WebClient(slackToken);
     const rtm = new RTMClient(slackToken);
-
-    // web.users.info({ user: this.userId }).then(data => {
-
-    // console.log('heyo');
-    // const userAvatarURL = data.user.profile.image_72;
-    const userAvatarURL =
-      'https://avatars.slack-edge.com/2018-04-10/344384085874_2eec81c1f90277cd0bb6_72.jpg';
-    request(userAvatarURL, (error, response, body) => {
-      // sharp(body)
-      //   .flatten()
-      //   .resize(streamDeck.ICON_SIZE, streamDeck.ICON_SIZE)
-      //   .raw()
-      //   .toBuffer()
-      //   .then(buffer => {
-      //     this.onlineImage = buffer;
-      //   });
-      sharp(body)
-        .flatten()
-        .resize(streamDeck.ICON_SIZE, streamDeck.ICON_SIZE)
-        .raw()
-        .toBuffer()
-        .then(buffer => {
-          this.offlineImage = buffer;
-        });
-    });
-    // });
 
     rtm.start({
       batch_presence_aware: true
@@ -57,11 +30,32 @@ class ShowUserStatus {
 
     rtm.subscribePresence([this.userId]);
 
-    rtm.on('presence_change', event => {
-      console.log(`setting to ${event.presence}`);
-      event.presence === 'active'
-        ? streamDeck.fillImage(this.buttonId, this.onlineImage)
-        : streamDeck.fillColor(this.buttonId, this.offlineImage);
+    web.users.info({ user: this.userId }).then(data => {
+      const userAvatarURL = data.user.profile.image_original;
+
+      request(userAvatarURL, (error, response, body) => {
+        sharp(body)
+          .png()
+          .toBuffer()
+          .then(buffer => {
+            this.onlineImage = buffer;
+          });
+
+        sharp(body)
+          .grayscale()
+          .png()
+          .toBuffer()
+          .then(buffer => {
+            this.offlineImage = buffer;
+          });
+
+        rtm.on('presence_change', event => {
+          console.log(`setting to ${event.presence}`);
+          event.presence === 'active'
+            ? streamDeck.fillImageFromFile(this.buttonId, this.onlineImage)
+            : streamDeck.fillImageFromFile(this.buttonId, this.offlineImage);
+        });
+      });
     });
   }
 }
@@ -73,7 +67,7 @@ class ToggleStatus {
     let myPresence = 'away';
 
     const slackToken = process.env.SLACK_API_TOKEN;
-    // const web = new WebClient(slackToken);
+    const web = new WebClient(slackToken);
     const rtm = new RTMClient(slackToken);
 
     this._updateButton(myPresence);
@@ -93,7 +87,7 @@ class ToggleStatus {
       console.log('up!');
       if (keyIndex === buttonId) {
         let newStatus = myPresence === 'away' ? 'auto' : 'away';
-        // web.users.setPresence({ presence: newStatus });
+        web.users.setPresence({ presence: newStatus });
         this._updateButton(newStatus);
       }
     });
