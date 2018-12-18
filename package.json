@@ -1,6 +1,6 @@
 {
   "name": "control-deck-slack",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Control Deck plugin to interact with Slack",
   "main": "index.js",
   "author": "Daniel Murphy",
