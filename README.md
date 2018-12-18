@@ -6,9 +6,15 @@ This [Control Deck](https://github.com/danielmurphy/control-deck) plugin gives y
 
 `user` - Adds a user's avatar as a button on your Stream Deck. When they are online, the image will look normal, but when they are away their avatar will be desaturated. Pushing the button will open Slack to a DM conversation with them.
 
+## Install
+
+`npm install control-deck-slack`
+
 ## Configuration
 
 ### Status Toggle
+
+Use `toggle-status` to toggle your own status on and off.`user_id` should be your slack user id.
 
 ```
 "button_0": {
@@ -21,6 +27,8 @@ This [Control Deck](https://github.com/danielmurphy/control-deck) plugin gives y
 ```
 
 ### User Shortcut
+
+Use `user` to setup DM shortcuts for your teammates.
 
 ```
 "button_0": {
@@ -37,11 +45,7 @@ This [Control Deck](https://github.com/danielmurphy/control-deck) plugin gives y
 
 ### Generating a Slack Access Token
 
-Create a new [Slack app](https://api.slack.com/apps?new_app=1) in your workspace. Be sure to give it `users:read` and `users:write` permissions, then install the app in your workspace. Once installed, you'll be able to generate an OAuth access token.
-
-The plugin expects that access token to be in your `ENV` in `SLACK_API_TOKEN`.
-
-Expects a Slack token in `ENV['SLACK_API_TOKEN']`
+Create a new [Slack Legacy Token](https://api.slack.com/custom-integrations/legacy-tokens) in your workspace. The plugin expects that access token to be in your `ENV` in `SLACK_API_TOKEN`.
 
 ## Contributing
 
